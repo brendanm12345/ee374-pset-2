@@ -35,7 +35,8 @@ export type ObjectMessageType = Static<typeof GetObjectMessage>
 const ErrorChoices = Union(
   Literal('INTERNAL_ERROR'),
   Literal('INVALID_FORMAT'),
-  Literal('INVALID_HANDSHAKE')
+  Literal('INVALID_HANDSHAKE'),
+  Literal('UNKNOWN_OBJECT'),
 )
 
 export const ErrorMessage = Record({

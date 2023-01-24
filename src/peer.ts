@@ -74,10 +74,15 @@ export class Peer {
     this.info(`Remote party is requesting object: ${object.objectid}`) 
     // look up object.id and take result of this and send it if it exists
     // if it doesnt exist send and unknown object error
-    await this.sendObject(object)
+    const requestedObj = await db.get(object.objectid);
+    if (requestedObj) {
+      await this.sendObject(requestedObj);
+    } else {
+      return await this.fatalError(new AnnotatedError('UNKNOWN_OBJECT', `Requested object not found of id: ${object.objectid}`));
+    }
+    
   }
   // NEW ^
-  // gossip, ignore
 
   async fatalError(err: AnnotatedError) {
     await this.sendError(err)
@@ -122,10 +127,8 @@ export class Peer {
       this.onMessageGetPeers.bind(this),
       this.onMessagePeers.bind(this),
       this.onMessageError.bind(this),
-      // NEW
       this.onMessageIHaveObject.bind(this),
       this.onMessageGetObject.bind(this),
-      // NEW ^
 
       // would onMessageGetObject be here too?
     )(msg)
