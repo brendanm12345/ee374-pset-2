@@ -77,6 +77,7 @@ export class Peer {
     await this.sendObject(object)
   }
   // NEW ^
+  // gossip, ignore
 
   async fatalError(err: AnnotatedError) {
     await this.sendError(err)
