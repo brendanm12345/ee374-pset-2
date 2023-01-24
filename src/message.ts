@@ -19,6 +19,12 @@ export const PeersMessage = Record({
 export type PeersMessageType = Static<typeof PeersMessage>
 
 // NEW
+export const IHaveObjectMessage = Record({
+  type: Literal('ihaveobject')
+})
+
+export type IHaveObjectMessageType = Static<typeof IHaveObjectMessage>
+
 export const GetObjectMessage = Record({
   type: Literal('objectid'),
   objectid: String
