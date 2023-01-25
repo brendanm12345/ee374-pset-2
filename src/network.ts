@@ -4,7 +4,7 @@ import { Peer } from './peer'
 import { EventEmitter } from 'events'
 import { peerManager } from './peermanager'
 
-const TIMEOUT_DELAY = 10000 // 10 seconds
+const TIMEOUT_DELAY = 20000 // 10 seconds
 const MAX_BUFFER_SIZE = 100 * 1024 // 100 kB
 
 // initialize set of peers (load) , create a server and add the current peer

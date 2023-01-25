@@ -71,17 +71,16 @@ export class Peer {
 
   }
   // NEW
-  async getObject(objectid: string) {
-    this.info(`Remote party is requesting object: ${objectid}`) 
+  async getObject(object: string) {
+    this.info(`Remote party is requesting object: ${object}`) 
     // look up object.id and take result of this and send it if it exists
     // if it doesnt exist send and unknown object error
-    const requestedObj = await db.get(objectid);
+    const requestedObj = await db.get(object);
     if (requestedObj) {
       await this.sendObject(requestedObj);
     } else {
-      return await this.fatalError(new AnnotatedError('UNKNOWN_OBJECT', `Requested object not found of id: ${object.objectid}`));
+      return await this.fatalError(new AnnotatedError('UNKNOWN_OBJECT', `Requested object not found of id: ${object}`));
     }
-    
   }
   // NEW ^
 
