@@ -11,6 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/semver": "^7.3.13",
+    "blake2": "^4.1.1",
     "is-valid-hostname": "^1.0.2",
     "json-canonicalize": "^1.0.4",
     "level-ts": "^2.1.0",

@@ -68,6 +68,9 @@ export class Peer {
 
     this.debug(`Sending message: ${message}`)
     this.socket.sendMessage(message)
+
+    // Get object
+
   }
   // NEW
   async getObject(object: ObjectMessageType) {
@@ -127,6 +130,7 @@ export class Peer {
       this.onMessageGetPeers.bind(this),
       this.onMessagePeers.bind(this),
       this.onMessageError.bind(this),
+
       this.onMessageIHaveObject.bind(this),
       this.onMessageGetObject.bind(this),
 
@@ -165,7 +169,9 @@ export class Peer {
       } else {
           console.log(`Requesting sender for object with id: ${object.objectid}`);
           // request sender for object
+          // We dont know what the object is, so we need to request that from the sender
           this.getObject(object);
+          // should be sendMessage (getObject)
       }
   });
   }
