@@ -48,7 +48,7 @@ export class Peer {
     })
   }
 
-  // NEW
+  // NEW 
   async sendObject(object: ObjectMessageType) {
     this.sendMessage({
       type: 'object',
