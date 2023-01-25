@@ -2,8 +2,8 @@ import { logger } from './logger'
 import { MessageSocket } from './network'
 import semver from 'semver'
 import { Messages,
-         Message, HelloMessage, PeersMessage, GetPeersMessage, ErrorMessage, GetObjectMessage,
-         MessageType, HelloMessageType, PeersMessageType, GetPeersMessageType, ErrorMessageType, ObjectMessageType, AnnotatedError } from './message'
+         Message, HelloMessage, PeersMessage, GetPeersMessage, ErrorMessage, GetObjectMessage, SendObjectMessage
+         MessageType, HelloMessageType, PeersMessageType, GetPeersMessageType, ErrorMessageType, ObjectMessageType, SendObjectMessageType AnnotatedError } from './message'
 import { peerManager } from './peermanager'
 import { canonicalize } from 'json-canonicalize'
 import { isGeneratorObject } from 'util/types'
@@ -32,14 +32,12 @@ export class Peer {
       type: 'getpeers'
     })
   }
-  // NEW
+
   async sendIHaveObject() {
     this.sendMessage({
       type: 'ihaveobject'
     })
   }
-
-  // NEW
 
   async sendPeers() {
     this.sendMessage({
@@ -48,8 +46,7 @@ export class Peer {
     })
   }
 
-  // NEW 
-  async sendObject(object: ObjectMessageType) {
+  async sendObject(object: SendObjectMessageType) {
     this.sendMessage({
       type: 'object',
       object: object
@@ -130,7 +127,6 @@ export class Peer {
       this.onMessageGetPeers.bind(this),
       this.onMessagePeers.bind(this),
       this.onMessageError.bind(this),
-
       this.onMessageIHaveObject.bind(this),
       this.onMessageGetObject.bind(this),
 
@@ -177,8 +173,13 @@ export class Peer {
   }
 
   async onMessageGetObject(objectId: ObjectMessageType) {
-    this.info(`Remote party is requesting peers. Sharing.`);
-    await this.getObject(objectId);
+    // this.info(`Remote party is requesting peers. Sharing.`);
+    // await this.getObject(objectId);
+    await this.sendMessage({
+      type: 'object',
+      object: objectId
+    })
+      
   }
 
   log(level: string, message: string) {

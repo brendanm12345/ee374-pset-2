@@ -26,11 +26,23 @@ export const IHaveObjectMessage = Record({
 export type IHaveObjectMessageType = Static<typeof IHaveObjectMessage>
 
 export const GetObjectMessage = Record({
-  type: Literal('objectid'),
+  type: Literal('get object'),
   objectid: String
 })
+
 export type ObjectMessageType = Static<typeof GetObjectMessage>
-// NEW ^
+
+export const SendObjectMessage = Record({
+  type: Literal('object'),
+  object: String,
+})
+
+export type SendObjectMessageType = Static<typeof SendObjectMessage>
+
+
+
+
+
 
 const ErrorChoices = Union(
   Literal('INTERNAL_ERROR'),
