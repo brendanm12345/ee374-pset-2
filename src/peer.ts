@@ -5,11 +5,10 @@ import { Messages,
          Message, HelloMessage, PeersMessage, GetPeersMessage, ErrorMessage, GetObjectMessage, ObjectMessage, IHaveObjectMessage,
          MessageType, HelloMessageType, PeersMessageType, GetPeersMessageType, ErrorMessageType, GetObjectMessageType, ObjectMessageType, AnnotatedError, IHaveObjectMessageType } from './message'
 import { peerManager } from './peermanager'
-import { transactionManager } from './objmanager'  // NEW
+import { objectManager } from './objmanager'  // NEW
 import { canonicalize } from 'json-canonicalize'
 import { isGeneratorObject } from 'util/types'
 import { objdb } from './store'
-import level from 'level-ts'
 
 const VERSION = '0.9.0'
 const NAME = 'Malibu (pset1)'
@@ -49,7 +48,7 @@ export class Peer {
   }
 
   async sendGetObject(objID: string) {
-    const requestedObj = await objdb.get(objID);
+    const requestedObj = await objectManager.getObject(objID);
       if (requestedObj) {  
       this.sendMessage({
         type: 'getobject',
@@ -178,7 +177,8 @@ export class Peer {
   async onMessageObject(obj_msg: ObjectMessageType) {
     this.info(`Remote party is sending object: ${obj_msg.object}`);
 
-    // Need to implement here
+
+    // Need to implement here !!!!!!!
     objectManager.objectDiscovered(obj_msg.object);
   }
   // NEW ^

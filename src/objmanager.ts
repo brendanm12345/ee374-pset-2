@@ -1,30 +1,41 @@
 import { objdb } from './store'
 import { logger } from './logger'
+import { txManager } from './txmanager'
 
 var blake2 = require('blake2');
 
-class TransactionManager {
+class ObjectManager {
 
-    knownTransactions: Set<string> = new Set();
+    knownObjects: Set<string> = new Set();
 
     async load() {
         try {
-            this.knownTransactions = new Set(await objdb.get('transactions'));
-            logger.debug(`Loaded known transactions: ${[...this.knownTransactions]}`);
+            this.knownObjects = new Set(await objdb.get('transactions'));
+            logger.debug(`Loaded known transactions: ${[...this.knownObjects]}`);
         }
         catch {
             logger.info(`Initializing transactions database`);
-            this.knownTransactions = new Set(); // Need to put the geneis transaction here i think?
-            await this.store();
+            this.knownObjects = new Set(); // Need to put the geneis transaction here i think?
+            await this.storeObject();
         }
     }
+
+    async getObject(objID: string) {
+        return await objdb.get(objID);
+    }
   
-    async store() {
-        await objdb.put('transactions', [...this.knownTransactions]);
+    async storeObject() {
+        await objdb.put('transactions', [...this.knownObjects]);
         // gossip the object
     }
 
+    // Verify the object and add it to the object database
     objectDiscovered(object: string) {
+        // if the object is a tansaction
+        if (object.type == "transaction") {
+
+        txManager.verifyTx(object);
+
         // check that the incoming object is valid and add it to the object database
 
         // check that the transaction contains the keys "inputs" and "outputs"
@@ -45,7 +56,8 @@ class TransactionManager {
 
         // Transactions must respect the law of conservation
 
+        }
     }
 }
 
-export const transactionManager = new TransactionManager();
+export const objectManager = new ObjectManager();
