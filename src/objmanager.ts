@@ -32,9 +32,16 @@ class ObjectManager {
     // Verify the object and add it to the object database
     objectDiscovered(object: string) {
         // if the object is a tansaction
-        if (object.type == "transaction") {
+        if (JSON.parse(object).type != "transaction") {
+            // Throw an error
+        }
 
-        txManager.verifyTx(object);
+        if(!txManager.verifyTx(object)) {
+            // Throw an error
+        }
+
+        this.knownObjects.add(object);
+        this.storeObject();
 
         // check that the incoming object is valid and add it to the object database
 
@@ -55,8 +62,6 @@ class ObjectManager {
         // -> public key is is in correct format
 
         // Transactions must respect the law of conservation
-
-        }
     }
 }
 

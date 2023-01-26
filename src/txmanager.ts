@@ -2,7 +2,7 @@ import {logger} from './logger'
 
 class TxManager {
     verifyTx(tx: string) {
-        
+        return false;
     }
 }
   
