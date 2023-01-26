@@ -1,12 +1,13 @@
 import { objdb } from './store'
 import { logger } from './logger'
 import { txManager } from './txmanager'
+import { stringify } from 'querystring';
 
-var blake2 = require('blake2');
+const blake2 = require('blake2');
 
 class ObjectManager {
 
-    knownObjects: Set<string> = new Set();
+    knownObjects: Set<Map<string, string>> = new Set();
 
     async load() {
         try {
@@ -40,28 +41,15 @@ class ObjectManager {
             // Throw an error
         }
 
-        this.knownObjects.add(object);
+        // hash the object using blake2 and map it to the object
+        var hash = blake2.createHash('blake2b');
+
+        // create a map that maps a string to a string
+        var mappedObject = new Map<string, string>();
+        mappedObject.set(hash.update(object).digest('hex'), object);
+
+        this.knownObjects.add(mappedObject);
         this.storeObject();
-
-        // check that the incoming object is valid and add it to the object database
-
-        // check that the transaction contains the keys "inputs" and "outputs"
-        
-
-        // CHeck that each input contains the keys "ouput" and "sig". (public keys and signatures need
-        // to be hexadecimal strings of required length)
-            // Esnure that a valid tx by verifying the txid exists in the object db &
-            // given index is less than unmber of outputs in the outpoint transaction
-            // Ensure that the signature is valid
-
-        
-
-        // The index which is located in the input -> outpoint -> index must be non-neg integer
-
-        // The value which is located in the outputs -> value must be a non-neg integer. outputs
-        // -> public key is is in correct format
-
-        // Transactions must respect the law of conservation
     }
 }
 
