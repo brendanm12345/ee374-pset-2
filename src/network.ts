@@ -3,7 +3,7 @@ import { logger } from './logger'
 import { Peer } from './peer'
 import { EventEmitter } from 'events'
 import { peerManager } from './peermanager'
-import { transactionManager } from './objmanager'
+import { objectManager } from './objmanager'
 
 const TIMEOUT_DELAY = 20000 // 10 seconds
 const MAX_BUFFER_SIZE = 100 * 1024 // 100 kB
@@ -14,7 +14,7 @@ export class Network {
 
   async init(bindPort: number, bindIP: string) {
     await peerManager.load()
-    await transactionManager.load()
+    await objectManager.load()
     // create server and add current peer
     const server = net.createServer(socket => {
       logger.info(`New connection from peer ${socket.remoteAddress}`)
