@@ -2,17 +2,17 @@ import { logger } from './logger'
 import { MessageSocket } from './network'
 import semver from 'semver'
 import { Messages,
-         Message, HelloMessage, PeersMessage, GetPeersMessage, ErrorMessage, GetObjectMessage, SendObjectMessage, IHaveObjectMessage,
-         MessageType, HelloMessageType, PeersMessageType, GetPeersMessageType, ErrorMessageType, GetObjectMessageType, SendObjectMessageType, AnnotatedError, IHaveObjectMessageType } from './message'
+         Message, HelloMessage, PeersMessage, GetPeersMessage, ErrorMessage, GetObjectMessage, ObjectMessage, IHaveObjectMessage,
+         MessageType, HelloMessageType, PeersMessageType, GetPeersMessageType, ErrorMessageType, GetObjectMessageType, ObjectMessageType, AnnotatedError, IHaveObjectMessageType } from './message'
 import { peerManager } from './peermanager'
+import { transactionManager } from './objmanager'  // NEW
 import { canonicalize } from 'json-canonicalize'
 import { isGeneratorObject } from 'util/types'
+import { objdb } from './store'
 import level from 'level-ts'
 
 const VERSION = '0.9.0'
 const NAME = 'Malibu (pset1)'
-
-const db = new level('./tempdb');
 
 // handles connecting and handling errors for new peers
 export class Peer {
@@ -33,13 +33,6 @@ export class Peer {
     })
   }
 
-  async sendIHaveObject(object: IHaveObjectMessageType) {
-    this.sendMessage({
-      type: 'ihaveobject',
-      objectid: object.objectid
-    })
-  }
-
   async sendPeers() {
     this.sendMessage({
       type: 'peers',
@@ -47,12 +40,33 @@ export class Peer {
     })
   }
 
-  async sendObject(object: SendObjectMessageType) {
+  // NEW
+  async sendIHaveObject(objID: string) {
     this.sendMessage({
-      type: 'object',
-      object: object
+      type: 'ihaveobject',
+      objectid: objID
     })
   }
+
+  async sendGetObject(objID: string) {
+    const requestedObj = await objdb.get(objID);
+      if (requestedObj) {  
+      this.sendMessage({
+        type: 'getobject',
+        object: objID
+      })
+    } else {
+      return await this.fatalError(new AnnotatedError('UNKNOWN_OBJECT', `Requested object not found of id: ${objID}`));
+    }
+  }
+
+  async sendObject(objID: string) {
+    this.sendMessage({
+      type: 'object',
+      object: objdb.get(objID)
+    })
+  }
+  // NEW ^
 
   async sendError(err: AnnotatedError) {
     try {
@@ -61,28 +75,12 @@ export class Peer {
       this.sendMessage(new AnnotatedError('INTERNAL_ERROR', `Failed to serialize error message: ${error}`).getJSON())
     }
   }
+
   sendMessage(obj: object) {
     const message: string = canonicalize(obj)
-
     this.debug(`Sending message: ${message}`)
     this.socket.sendMessage(message)
-
-    // Get object
-
   }
-  // NEW
-  async getObject(object: string) {
-    this.info(`Remote party is requesting object: ${object}`) 
-    // look up object.id and take result of this and send it if it exists
-    // if it doesnt exist send and unknown object error
-    const requestedObj = await db.get(object);
-    if (requestedObj) {
-      await this.sendObject(requestedObj);
-    } else {
-      return await this.fatalError(new AnnotatedError('UNKNOWN_OBJECT', `Requested object not found of id: ${object}`));
-    }
-  }
-  // NEW ^
 
   async fatalError(err: AnnotatedError) {
     await this.sendError(err)
@@ -94,10 +92,7 @@ export class Peer {
     this.active = true
     await this.sendHello()
     await this.sendGetPeers()
-    await this.sendIHaveObject({
-      type: "i have object",
-      objectid: "1234567"
-    })
+    await this.sendIHaveObject("1234567") // <-- only need to send the ID, not the whole object
   }
   async onTimeout() {
     return await this.fatalError(new AnnotatedError('INVALID_FORMAT', 'Timed out before message was complete'))
@@ -130,8 +125,11 @@ export class Peer {
       this.onMessageGetPeers.bind(this),
       this.onMessagePeers.bind(this),
       this.onMessageError.bind(this),
+      // NEW
       this.onMessageIHaveObject.bind(this),
       this.onMessageGetObject.bind(this),
+      this.onMessageObject.bind(this),
+      // NEW ^
     )(msg)
   }
   async onMessageHello(msg: HelloMessageType) {
@@ -157,31 +155,33 @@ export class Peer {
   async onMessageError(msg: ErrorMessageType) {
     this.warn(`Peer reported error: ${msg.name}`)
   }
-  // NEW
-  // hardcode db, ObjectIdMessageType
-  async onMessageIHaveObject(object: IHaveObjectMessageType) {
-    db.get(object.objectid).then((value: any) => {
+  
+  // NEW 
+  async onMessageIHaveObject(msg: IHaveObjectMessageType) {
+    objdb.get(msg.objectid).then((value: any) => {
       if (value) {
-          console.log(`Object with id ${object.objectid} is already in the database`);
+          console.log(`Object with id ${msg.objectid} is already in the database`);
       } else {
-          console.log(`Requesting sender for object with id: ${object.objectid}`);
-          // request sender for object
-          // We dont know what the object is, so we need to request that from the sender
-          this.getObject(object.objectid);
-          // should be sendMessage (getObject)
+          console.log(`Requesting sender for object with id: ${msg.objectid}`);
+
+          // Send getObject message
+          this.sendGetObject(msg.objectid);
       }
   });
   }
 
-  async onMessageGetObject(objectId: GetObjectMessageType) {
-    // this.info(`Remote party is requesting peers. Sharing.`);
-    // await this.getObject(objectId);
-    await this.sendMessage({
-      type: 'object',
-      object: objectId
-    })
-      
+  async onMessageGetObject(msg: GetObjectMessageType) {
+    this.info(`Remote party is requesting object. Sharing.`);
+    await this.sendObject(msg.objectid)
   }
+
+  async onMessageObject(obj_msg: ObjectMessageType) {
+    this.info(`Remote party is sending object: ${obj_msg.object}`);
+
+    // Need to implement here
+    objectManager.objectDiscovered(obj_msg.object);
+  }
+  // NEW ^
 
   log(level: string, message: string) {
     logger.log(level, `[peer ${this.socket.peerAddr}:${this.socket.netSocket.remotePort}] ${message}`)

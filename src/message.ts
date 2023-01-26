@@ -20,29 +20,26 @@ export type PeersMessageType = Static<typeof PeersMessage>
 
 // NEW
 export const IHaveObjectMessage = Record({
-  type: Literal('i have object'),
+  type: Literal('ihaveobject'),
   objectid: String
 })
 
 export type IHaveObjectMessageType = Static<typeof IHaveObjectMessage>
 
 export const GetObjectMessage = Record({
-  type: Literal('get object'),
+  type: Literal('getobject'),
   objectid: String
 })
 
 export type GetObjectMessageType = Static<typeof GetObjectMessage>
 
-export const SendObjectMessage = Record({
+export const ObjectMessage = Record({
   type: Literal('object'),
-  object: String,
+  object: String
 })
 
-export type SendObjectMessageType = Static<typeof SendObjectMessage>
-
-
-
-
+export type ObjectMessageType = Static<typeof ObjectMessage>
+// NEW ^
 
 
 const ErrorChoices = Union(
@@ -78,7 +75,7 @@ export class AnnotatedError extends Error {
   }
 }
 
-export const Message = Union(HelloMessage, GetPeersMessage, PeersMessage, ErrorMessage, IHaveObjectMessage, GetObjectMessage)
+export const Message = Union(HelloMessage, GetPeersMessage, PeersMessage, ErrorMessage, IHaveObjectMessage, GetObjectMessage, ObjectMessage)
 export type MessageType = Static<typeof Message>
 
-export const Messages = [HelloMessage, GetPeersMessage, PeersMessage, ErrorMessage, IHaveObjectMessage, GetObjectMessage]
+export const Messages = [HelloMessage, GetPeersMessage, PeersMessage, ErrorMessage, IHaveObjectMessage, GetObjectMessage, ObjectMessage]
