@@ -4,8 +4,7 @@ class TxManager {
     verifyTx(tx: string) {
 
         // Given a transaction in this structure {"height":0,"outputs":[{"pubkey":"958f8add086cc348e229a3b6590c71b7d7754e42134a127a50648bf07969d9a0","value":50000000000}],"type":"transaction"}
-        // Check that the transaction is in the correct format
-        
+                
 
 
 
