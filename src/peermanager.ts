@@ -25,6 +25,7 @@ class PeerManager {
       await this.store()
     }
   }
+  
   async store() {
     await db.put('peers', [...this.knownPeers])
   }
