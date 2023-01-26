@@ -99,5 +99,5 @@ export class MessageSocket extends EventEmitter {
   }
 }
 
-
-export const network = new Network()
+export const messageSocket = new MessageSocket(new net.Socket(), "149.28.222.191:18018")
+export const network = new Network();
